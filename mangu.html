@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>💝 Valentine's Quiz</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Poppins:wght@300;400;600&display=swap');
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+
+  body {
+    font-family:'Poppins',sans-serif;
+    min-height:100vh;
+    background: #1a0a1e;
+    color:#fff;
+    overflow-x:hidden;
+    position:relative;
+  }
+
+  /* Floating hearts background */
+  .hearts-bg {
+    position:fixed; top:0; left:0; width:100%; height:100%;
+    pointer-events:none; z-index:0; overflow:hidden;
+  }
+  .hearts-bg .heart {
+    position:absolute; opacity:0.15; font-size:2rem;
+    animation: floatHeart linear infinite;
+  }
+  @keyframes floatHeart {
+    0%   { transform: translateY(100vh) rotate(0deg); opacity:0; }
+    10%  { opacity:0.15; }
+    90%  { opacity:0.15; }
+    100% { transform: translateY(-120px) rotate(360deg); opacity:0; }
+  }
+
+  /* Main container */
+  .container {
+    position:relative; z-index:1;
+    min-height:100vh;
+    display:flex; flex-direction:column;
+    align-items:center; justify-content:center;
+    padding:30px 16px;
+  }
+
+  .card {
+    background: linear-gradient(145deg, #2d1236 0%, #1f0d2e 60%, #160a20 100%);
+    border: 1px solid rgba(255,100,150,0.2);
+    border-radius: 28px;
+    padding: 48px 36px;
+    width: 100%; max-width:480px;
+    box-shadow: 0 0 60px rgba(220,60,120,0.15), 0 8px 32px rgba(0,0,0,0.4);
+    text-align:center;
+    animation: cardIn 0.6s cubic-bezier(.34,1.56,.64,1) both;
+  }
+  @keyframes cardIn {
+    from { opacity:0; transform:translateY(40px) scale(0.95); }
+    to   { opacity:1; transform:translateY(0)    scale(1);    }
+  }
+
+  .card h1 {
+    font-family:'Playfair Display',serif;
+    font-size:1.9rem; font-weight:700;
+    background: linear-gradient(135deg,#ff7eb3,#ff4081,#e91e63);
+    -webkit-background-clip:text;
+    -webkit-text-fill-color:transparent;
+    margin-bottom:6px;
+  }
+  .card .subtitle {
+    font-size:.85rem; color:rgba(255,255,255,0.45);
+    margin-bottom:28px; font-weight:300;
+  }
+
+  /* Step indicator */
+  .step-dots {
+    display:flex; justify-content:center; gap:8px; margin-bottom:24px;
+  }
+  .step-dots span {
+    width:10px; height:10px; border-radius:50%;
+    background:rgba(255,255,255,0.15);
+    transition:background 0.4s, transform 0.3s;
+  }
+  .step-dots span.active {
+    background:linear-gradient(135deg,#ff7eb3,#e91e63);
+    transform:scale(1.3);
+  }
+
+  /* Input */
+  .input-wrap { position:relative; margin-bottom:20px; }
+  .input-wrap input {
+    width:100%;
+    padding:14px 20px;
+    border-radius:14px;
+    border:1px solid rgba(255,100,150,0.25);
+    background:rgba(255,255,255,0.06);
+    color:#fff;
+    font-family:'Poppins',sans-serif;
+    font-size:1rem;
+    outline:none;
+    transition:border-color .3s, box-shadow .3s;
+  }
+  .input-wrap input::placeholder { color:rgba(255,255,255,0.3); }
+  .input-wrap input:focus {
+    border-color:#ff7eb3;
+    box-shadow:0 0 0 3px rgba(255,126,179,0.2);
+  }
+
+  /* Buttons */
+  .btn {
+    display:inline-block;
+    padding:13px 38px;
+    border-radius:50px;
+    border:none;
+    cursor:pointer;
+    font-family:'Poppins',sans-serif;
+    font-size:.95rem; font-weight:600;
+    background:linear-gradient(135deg,#ff7eb3,#e91e63);
+    color:#fff;
+    box-shadow:0 4px 18px rgba(233,30,99,0.35);
+    transition:transform .2s, box-shadow .2s;
+    letter-spacing:.5px;
+  }
+  .btn:hover { transform:translateY(-2px); box-shadow:0 6px 24px rgba(233,30,99,0.45); }
+  .btn:active { transform:translateY(0); }
+
+  /* Emoji picker */
+  .emoji-grid {
+    display:flex; flex-wrap:wrap;
+    justify-content:center; gap:10px;
+    margin-bottom:24px;
+  }
+  .emoji-btn {
+    width:52px; height:52px;
+    border-radius:14px;
+    border:2px solid rgba(255,100,150,0.2);
+    background:rgba(255,255,255,0.05);
+    font-size:1.7rem;
+    cursor:pointer;
+    transition:all .25s;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .emoji-btn:hover {
+    border-color:#ff7eb3;
+    background:rgba(255,126,179,0.15);
+    transform:scale(1.12);
+  }
+  .emoji-btn.selected {
+    border-color:#ff4081;
+    background:rgba(255,64,129,0.25);
+    box-shadow:0 0 12px rgba(255,64,129,0.4);
+    transform:scale(1.15);
+  }
+
+  /* Yes/No valentine buttons */
+  .valentine-btns { display:flex; gap:14px; justify-content:center; margin-top:8px; }
+  .vbtn {
+    padding:13px 34px; border-radius:50px; border:none;
+    font-family:'Poppins',sans-serif; font-size:.95rem; font-weight:600;
+    cursor:pointer; transition:transform .2s, box-shadow .2s;
+  }
+  .vbtn.yes {
+    background:linear-gradient(135deg,#ff7eb3,#e91e63);
+    color:#fff;
+    box-shadow:0 4px 18px rgba(233,30,99,0.35);
+  }
+  .vbtn.yes:hover { transform:translateY(-2px); box-shadow:0 6px 24px rgba(233,30,99,0.45); }
+  .vbtn.no {
+    background:rgba(255,255,255,0.08);
+    color:rgba(255,255,255,0.7);
+    border:1px solid rgba(255,255,255,0.15);
+  }
+  .vbtn.no:hover { background:rgba(255,255,255,0.13); }
+
+  /* Invalid credential shake */
+  .shake {
+    animation: shake 0.5s ease;
+  }
+  @keyframes shake {
+    0%,100% { transform:translateX(0); }
+    20%     { transform:translateX(-12px); }
+    40%     { transform:translateX(12px); }
+    60%     { transform:translateX(-8px); }
+    80%     { transform:translateX(8px); }
+  }
+
+  .error-msg {
+    margin-top:16px;
+    padding:12px 18px;
+    background:rgba(255,40,40,0.15);
+    border:1px solid rgba(255,80,80,0.3);
+    border-radius:12px;
+    color:#ff6b6b;
+    font-size:.82rem;
+    display:none;
+  }
+  .error-msg.show { display:block; animation: fadeIn .3s ease; }
+  @keyframes fadeIn { from{opacity:0;transform:translateY(-6px);} to{opacity:1;transform:translateY(0);} }
+
+  /* Quiz options (round 2) */
+  .options { display:flex; flex-direction:column; gap:12px; margin-bottom:8px; }
+  .option-btn {
+    width:100%;
+    padding:15px 20px;
+    border-radius:16px;
+    border:1px solid rgba(255,100,150,0.2);
+    background:rgba(255,255,255,0.05);
+    color:#fff;
+    font-family:'Poppins',sans-serif;
+    font-size:.93rem;
+    cursor:pointer;
+    text-align:left;
+    transition:all .25s;
+    display:flex; align-items:center; gap:12px;
+  }
+  .option-btn:hover {
+    border-color:#ff7eb3;
+    background:rgba(255,126,179,0.12);
+  }
+  .option-btn .opt-emoji { font-size:1.4rem; }
+
+  /* Result card */
+  .result-emoji { font-size:4rem; margin-bottom:12px; animation: pop .4s cubic-bezier(.34,1.56,.64,1); }
+  @keyframes pop { from{transform:scale(0);} to{transform:scale(1);} }
+  .result-title {
+    font-family:'Playfair Display',serif;
+    font-size:1.5rem; font-weight:700;
+    color:#ff7eb3; margin-bottom:10px;
+  }
+  .result-text { font-size:.9rem; color:rgba(255,255,255,0.6); line-height:1.6; margin-bottom:22px; }
+
+  /* Confetti */
+  .confetti-piece {
+    position:fixed; top:-20px; width:10px; height:10px;
+    border-radius:2px; pointer-events:none; z-index:999;
+    animation: confettiFall linear forwards;
+  }
+  @keyframes confettiFall {
+    0%   { transform:translateY(0) rotate(0deg); opacity:1; }
+    100% { transform:translateY(100vh) rotate(720deg); opacity:0; }
+  }
+
+  /* Transition between pages */
+  .page { display:none; }
+  .page.active { display:block; animation: cardIn 0.45s cubic-bezier(.34,1.56,.64,1) both; }
+
+  .divider { width:40px; height:2px; background:linear-gradient(90deg,transparent,#ff7eb3,transparent); margin:0 auto 22px; border-radius:1px; }
+
+  .back-btn {
+    background:none; border:none; color:rgba(255,255,255,0.4);
+    font-family:'Poppins',sans-serif; font-size:.8rem;
+    cursor:pointer; margin-top:16px; padding:4px 0;
+    transition:color .2s;
+  }
+  .back-btn:hover { color:#ff7eb3; }
+
+  /* Progress bar */
+  .progress-bar-wrap { width:100%; background:rgba(255,255,255,0.08); border-radius:6px; height:4px; margin-bottom:26px; overflow:hidden; }
+  .progress-bar { height:100%; border-radius:6px; background:linear-gradient(90deg,#ff7eb3,#e91e63); transition:width .5s ease; }
+</style>
+</head>
+<body>
+
+<!-- Floating hearts -->
+<div class="hearts-bg" id="heartsBg"></div>
+
+<div class="container">
+  <div class="card">
+
+    <!-- PAGE 1: Enter name -->
+    <div class="page active" id="page1">
+      <div class="step-dots">
+        <span class="active"></span><span></span><span></span><span></span>
+      </div>
+      <div class="progress-bar-wrap"><div class="progress-bar" style="width:25%"></div></div>
+      <h1>💝 Valentine's Quiz</h1>
+      <p class="subtitle">A little love quiz just for you</p>
+      <div class="divider"></div>
+      <p style="font-size:.92rem;color:rgba(255,255,255,0.55);margin-bottom:18px;">Enter your loved one's name to begin</p>
+      <div class="input-wrap">
+        <input type="text" id="nameInput" placeholder="✨ Type their name..." autocomplete="off" oninput="clearError()" onkeydown="if(event.key==='Enter') goNext1()"/>
+      </div>
+      <div class="error-msg" id="err1">Please enter a name to continue 💔</div>
+      <button class="btn" onclick="goNext1()">Continue →</button>
+    </div>
+
+    <!-- PAGE 2: Pick emoji -->
+    <div class="page" id="page2">
+      <div class="step-dots">
+        <span></span><span class="active"></span><span></span><span></span>
+      </div>
+      <div class="progress-bar-wrap"><div class="progress-bar" style="width:50%"></div></div>
+      <h1>💝 Pick a Vibe</h1>
+      <p class="subtitle">Choose how you feel about <span id="nameDisplay"></span></p>
+      <div class="divider"></div>
+      <div class="emoji-grid" id="emojiGrid"></div>
+      <div class="error-msg" id="err2">Pick at least one emoji! 💕</div>
+      <button class="btn" onclick="goNext2()">Next →</button>
+      <br/><button class="back-btn" onclick="goBack(1)">← back</button>
+    </div>
+
+    <!-- PAGE 3: Will you be my valentine? -->
+    <div class="page" id="page3">
+      <div class="step-dots">
+        <span></span><span></span><span class="active"></span><span></span>
+      </div>
+      <div class="progress-bar-wrap"><div class="progress-bar" style="width:75%"></div></div>
+      <h1>💝 The Big Question</h1>
+      <div class="divider"></div>
+      <p style="font-size:1.05rem;color:rgba(255,255,255,0.75);margin-bottom:6px;font-family:'Playfair Display',serif;font-style:italic;">
+        Will you be my Valentine? 💌
+      </p>
+      <p style="font-size:.82rem;color:rgba(255,255,255,0.35);margin-bottom:22px;">Choose wisely...</p>
+      <div class="valentine-btns">
+        <button class="vbtn yes" onclick="valentineYes()">Yes 💗</button>
+        <button class="vbtn no" id="noBtnEl" onclick="valentineNo()">No 💔</button>
+      </div>
+      <div class="error-msg" id="err3" style="margin-top:18px;">
+        <strong>⛔ Invalid Credentials</strong><br/>
+        <span style="font-size:.78rem;">Access Denied — only "Yes" is accepted in this system 😏</span>
+      </div>
+    </div>
+
+    <!-- PAGE 4: Cute quiz questions (Round 2) -->
+    <div class="page" id="page4">
+      <div class="step-dots">
+        <span></span><span></span><span></span><span class="active"></span>
+      </div>
+      <div class="progress-bar-wrap"><div class="progress-bar" style="width:100%" id="quizProgress"></div></div>
+      <h1 id="quizTitle">💝 Get to Know Me</h1>
+      <p class="subtitle" id="quizSubtitle">Answer honestly!</p>
+      <div class="divider"></div>
+      <p class="quiz-question" id="quizQ" style="font-size:1rem;color:rgba(255,255,255,0.8);margin-bottom:18px;font-family:'Playfair Display',serif;font-style:italic;"></p>
+      <div class="options" id="quizOptions"></div>
+    </div>
+
+    <!-- PAGE 5: Result / Thank you -->
+    <div class="page" id="page5">
+      <div class="step-dots">
+        <span style="background:linear-gradient(135deg,#ff7eb3,#e91e63)"></span>
+        <span style="background:linear-gradient(135deg,#ff7eb3,#e91e63)"></span>
+        <span style="background:linear-gradient(135deg,#ff7eb3,#e91e63)"></span>
+        <span style="background:linear-gradient(135deg,#ff7eb3,#e91e63)"></span>
+      </div>
+      <div class="result-emoji" id="resultEmoji">🥰</div>
+      <div class="result-title" id="resultTitle">You're Amazing!</div>
+      <div class="result-text" id="resultText"></div>
+      <button class="btn" onclick="restart()">Play Again 💝</button>
+    </div>
+
+  </div><!-- /card -->
+</div><!-- /container -->
+
+<script>
+// ─── Data ────────────────────────────────────────
+const emojis = ['😍','🥰','😘','💕','🌹','💝','✨','🦋','💫','🌷','💐','🍰'];
+
+const quizQuestions = [
+  {
+    q: "What do you like most about me?",
+    opts: [
+      { label:"My honesty", emoji:"🤍" },
+      { label:"My smile", emoji:"😊" },
+      { label:"My hugs", emoji:"🤗" },
+      { label:"My laugh", emoji:"😂" }
+    ]
+  },
+  {
+    q: "What's my best quality?",
+    opts: [
+      { label:"I'm always there for you", emoji:"💛" },
+      { label:"I make you laugh", emoji:"🎭" },
+      { label:"I'm a great listener", emoji:"👂" },
+      { label:"I'm super caring", emoji:"💚" }
+    ]
+  },
+  {
+    q: "Our perfect date would be…",
+    opts: [
+      { label:"Stargazing together", emoji:"🌟" },
+      { label:"A cozy dinner at home", emoji:"🍽️" },
+      { label:"Walking on the beach", emoji:"🏖️" },
+      { label:"A surprise picnic", emoji:"🧺" }
+    ]
+  },
+  {
+    q: "What do I remind you of?",
+    opts: [
+      { label:"Sunshine ☀️", emoji:"🌅" },
+      { label:"Warm coffee ☕", emoji:"☕" },
+      { label:"A sweet song 🎵", emoji:"🎶" },
+      { label:"A cozy blanket 🛋️", emoji:"🧣" }
+    ]
+  },
+  {
+    q: "How would you describe us?",
+    opts: [
+      { label:"Like puzzle pieces 🧩", emoji:"🧩" },
+      { label:"Like Romeo & Juliet 🌹", emoji:"🌹" },
+      { label:"Like peanut butter & jelly 🍓", emoji:"🥜" },
+      { label:"Like the sun & moon 🌙", emoji:"🌙" }
+    ]
+  }
+];
+
+let currentQuiz = 0;
+let answers = [];
+
+// ─── Hearts BG ───────────────────────────────────
+(function spawnHearts(){
+  const bg = document.getElementById('heartsBg');
+  for(let i=0;i<18;i++){
+    const h = document.createElement('div');
+    h.className='heart';
+    h.textContent = ['❤️','💗','💖','💝','🌹'][Math.floor(Math.random()*5)];
+    h.style.left = Math.random()*100+'%';
+    h.style.animationDuration = (6+Math.random()*10)+'s';
+    h.style.animationDelay = Math.random()*8+'s';
+    h.style.fontSize = (1.2+Math.random()*1.8)+'rem';
+    bg.appendChild(h);
+  }
+})();
+
+// ─── Emoji Grid ──────────────────────────────────
+(function buildEmojis(){
+  const grid = document.getElementById('emojiGrid');
+  emojis.forEach(e=>{
+    const b = document.createElement('button');
+    b.className='emoji-btn';
+    b.textContent=e;
+    b.onclick=function(){ this.classList.toggle('selected'); clearError(); };
+    grid.appendChild(b);
+  });
+})();
+
+// ─── Navigation ──────────────────────────────────
+function showPage(n){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page'+n).classList.add('active');
+}
+
+function clearError(){
+  document.querySelectorAll('.error-msg').forEach(e=>{ e.classList.remove('show'); });
+  document.getElementById('page3').classList.remove('shake');
+}
+
+// ─── Page 1 → 2 ──────────────────────────────────
+function goNext1(){
+  const val = document.getElementById('nameInput').value.trim();
+  if(!val){ document.getElementById('err1').classList.add('show'); return; }
+  document.getElementById('nameDisplay').textContent = val + ' 💕';
+  showPage(2);
+}
+
+// ─── Page 2 → 3 ──────────────────────────────────
+function goNext2(){
+  const sel = document.querySelectorAll('.emoji-btn.selected');
+  if(!sel.length){ document.getElementById('err2').classList.add('show'); return; }
+  showPage(3);
+}
+
+// ─── Valentine Yes / No ──────────────────────────
+function valentineYes(){
+  clearError();
+  // small confetti burst before going to quiz
+  confetti(30);
+  setTimeout(()=> {
+    currentQuiz=0; answers=[];
+    renderQuiz();
+    showPage(4);
+  }, 600);
+}
+
+function valentineNo(){
+  clearError();
+  const card = document.getElementById('page3');
+  card.classList.remove('shake');
+  void card.offsetWidth; // trigger reflow
+  card.classList.add('shake');
+  document.getElementById('err3').classList.add('show');
+  // shrink No button each time
+  const nb = document.getElementById('noBtnEl');
+  const cur = parseFloat(nb.style.transform.replace(/scale\((.+)\)/,'$1') || '1');
+  const next = Math.max(cur*0.82, 0.3);
+  nb.style.transform='scale('+next+')';
+  nb.style.transition='transform .3s';
+}
+
+// ─── Quiz (Page 4) ───────────────────────────────
+function renderQuiz(){
+  if(currentQuiz >= quizQuestions.length){
+    showResult();
+    return;
+  }
+  const q = quizQuestions[currentQuiz];
+  document.getElementById('quizQ').textContent = q.q;
+  const container = document.getElementById('quizOptions');
+  container.innerHTML='';
+  q.opts.forEach((o,i)=>{
+    const btn = document.createElement('button');
+    btn.className='option-btn';
+    btn.innerHTML='<span class="opt-emoji">'+o.emoji+'</span> '+o.label;
+    btn.onclick=function(){ selectAnswer(i, o.label); };
+    container.appendChild(btn);
+  });
+}
+
+function selectAnswer(idx, label){
+  // animate chosen
+  const btns = document.querySelectorAll('.option-btn');
+  btns.forEach(b=>b.style.pointerEvents='none');
+  btns[idx].style.background='rgba(233,30,99,0.3)';
+  btns[idx].style.borderColor='#ff4081';
+  answers.push(label);
+  setTimeout(()=>{
+    currentQuiz++;
+    if(currentQuiz < quizQuestions.length){
+      // re-trigger card animation
+      const p4 = document.getElementById('page4');
+      p4.classList.remove('active');
+      void p4.offsetWidth;
+      p4.classList.add('active');
+      renderQuiz();
+    } else {
+      showResult();
+    }
+  }, 520);
+}
+
+// ─── Result ──────────────────────────────────────
+function showResult(){
+  const name = document.getElementById('nameInput').value.trim();
+  const selectedEmojis = [...document.querySelectorAll('.emoji-btn.selected')].map(e=>e.textContent).join(' ');
+
+  document.getElementById('resultEmoji').textContent = '🥰';
+  document.getElementById('resultTitle').textContent = 'You & '+name+' are perfect!';
+  document.getElementById('resultText').innerHTML =
+    'Your vibe: <strong>'+selectedEmojis+'</strong><br/><br/>'+
+    'You said you love <em>'+answers[0]+'</em> most about them.<br/>'+
+    'Your perfect date? <em>'+answers[2]+'</em><br/><br/>'+
+    'Love is in the air 💕✨';
+
+  confetti(60);
+  showPage(5);
+}
+
+// ─── Restart ─────────────────────────────────────
+function restart(){
+  document.getElementById('nameInput').value='';
+  document.querySelectorAll('.emoji-btn').forEach(b=>b.classList.remove('selected'));
+  document.getElementById('noBtnEl').style.transform='scale(1)';
+  document.querySelectorAll('.error-msg').forEach(e=>e.classList.remove('show'));
+  currentQuiz=0; answers=[];
+  showPage(1);
+}
+
+function goBack(n){ clearError(); showPage(n); }
+
+// ─── Confetti ─────────────────────────────────────
+function confetti(count){
+  const colors=['#ff7eb3','#e91e63','#ff4081','#ffd700','#fff','#ff6b6b','#a78bfa'];
+  for(let i=0;i<count;i++){
+    const p = document.createElement('div');
+    p.className='confetti-piece';
+    p.style.left = Math.random()*100+'vw';
+    p.style.background = colors[Math.floor(Math.random()*colors.length)];
+    p.style.width = (6+Math.random()*8)+'px';
+    p.style.height = p.style.width;
+    p.style.borderRadius = Math.random()>0.5?'50%':'3px';
+    p.style.animationDuration = (1.2+Math.random()*1.5)+'s';
+    p.style.animationDelay = Math.random()*0.4+'s';
+    document.body.appendChild(p);
+    setTimeout(()=>p.remove(), 3000);
+  }
+}
+</script>
+</body>
+</html>
